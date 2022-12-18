@@ -6,10 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define S21_INF (__builtin_inff())
-#define S21_NAN (__builtin_nanf(""))
-// #define S21_INF 1.0 / 0.0
-// #define S21_NAN 0.0 / 0.0
+#define S21_INF 1.0 / 0.0
+#define S21_NAN 0.0 / 0.0
 #define S21_isNAN(x) __builtin_isnan(x)
 #define S21_isINF(x) __builtin_isinf(x)
 #define S21_isFIN(x) __builtin_isfinite(x)

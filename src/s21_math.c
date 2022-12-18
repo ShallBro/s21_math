@@ -258,45 +258,25 @@ long double s21_acos(double x) {
 }
 
 long double s21_sin(double x) {
-  long double sum_sin = 0;
-  int count = 1;
-  if (x == S21_NAN || x == -S21_INF || x == S21_INF) return S21_NAN;
-  if (x == S21_PI) return 1e-50;
-  if (x == -S21_PI) return -1e-50;
-  if (x == 0) return 0;
-  while (x < -2 * S21_PI || 2 * S21_PI < x) {
-    if (x > 2 * S21_PI) {
-      x -= 2 * S21_PI;
-    } else {
-      x += 2 * S21_PI;
-    }
+  int count = -1;
+  if (x > 0) count = 1;
+  x *= count;
+  if (x > S21_PI) {
+    x -= 2 * S21_PI * s21_floor(x / (2 * S21_PI));
   }
-  if (x < 0) {
-    x = -x;
-    count = -1;
-  }
-  for (register int i = 0; i < 500; i++) {
-    sum_sin += s21_pow(-1, i) * s21_pow(x, 2 * i + 1) / s21_fact(2 * i + 1);
+  long double temp = x;
+  long double sum_sin = x;
+  unsigned int fact = 1;
+  while (s21_fabs(temp) > S21_EPS * S21_EPS) {
+    temp /= (fact + 1) * (fact + 2);
+    fact += 2;
+    temp *= -x * x;
+    sum_sin += temp;
   }
   return sum_sin * count;
 }
 
-long double s21_cos(double x) {
-  long double sum_cos = 0;
-  if (x == S21_NAN || x == -S21_INF || x == S21_INF) return S21_NAN;
-  while (x < -2 * S21_PI || 2 * S21_PI < x) {
-    if (x > 2 * S21_PI) {
-      x -= 2 * S21_PI;
-    } else {
-      x += 2 * S21_PI;
-    }
-  }
-  if (x < 0) x = -x;
-  for (register int i = 0; i < 500; i++) {
-    sum_cos += s21_pow(-1, i) * s21_pow(x, 2 * i) / s21_fact(2 * i);
-  }
-  return sum_cos;
-}
+long double s21_cos(double x) { return s21_sin(S21_PI / 2 - x); }
 
 long double s21_tan(double x) {
   if (x == S21_PI / 2) {
