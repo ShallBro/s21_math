@@ -32,6 +32,8 @@ long double s21_sqrt(double x) {
   mid = (left + right) / 2;
   if (x < 0) {
     mid = S21_NAN;
+  } else if (x == 0.0) {
+    mid = 0;
   } else {
     while ((mid - left) > S21_EPS) {
       if (mid * mid > x)
@@ -164,7 +166,7 @@ long double s21_floor(double x) {
 }
 
 long double s21_pow(double base, double exp) {
-  long double res;
+  long double res = 1;
   long double copy = base;
 
   if (copy < 0) {
@@ -173,9 +175,20 @@ long double s21_pow(double base, double exp) {
     if (s21_fmod(exp, 2) != 0) {
       res = -res;  // четная / нечетная степень при отрицательном основании
     }
+  } else if (copy == 0) {
+    if (exp == 0) {
+      res = 1;
+    } else {
+      res = 0;
+    }
   } else {
     res = s21_exp(exp * s21_log(base));
   }
+
+  if ((base == S21_INF && exp == 1) || (S21_isNAN(base) && exp == 0) ||
+      (base == 0 && exp == 0) ||
+      (s21_fabs(base) == 1 && (exp == -S21_INF || S21_isNAN(exp))))
+    res = 1;
   return res;
 }
 
