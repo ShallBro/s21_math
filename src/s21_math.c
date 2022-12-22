@@ -168,6 +168,7 @@ long double s21_floor(double x) {
 long double s21_pow(double base, double exp) {
   long double res = 1;
   long double copy = base;
+  long double expo = exp;
 
   if (copy < 0) {
     copy = -copy;
@@ -184,11 +185,23 @@ long double s21_pow(double base, double exp) {
   } else {
     res = s21_exp(exp * s21_log(base));
   }
-
+  if (expo < 0) {
+    expo = -expo;
+    if (base == 0) res = S21_INF;
+  }
   if ((base == S21_INF && exp == 1) || (S21_isNAN(base) && exp == 0) ||
-      (base == 0 && exp == 0) ||
+      (base == 0 && exp == 0) || (base == -1 && S21_isINF(exp)) ||
       (s21_fabs(base) == 1 && (exp == -S21_INF || S21_isNAN(exp))))
     res = 1;
+
+  if (base == -S21_INF && -exp) res = 0;
+  if ((s21_fabs(base) - 1 < S21_EPS && S21_isINF(exp) && exp < 0) ||
+      (s21_fabs(base) - 1 > S21_EPS && S21_isINF(exp) && exp > 0) ||
+      (s21_fabs(base) <= S21_EPS && base >= 0 && exp < 0))
+    res = S21_INF;
+  if (S21_isINF(base) && base < 0 && exp > 0) res = S21_INF;
+  if (S21_isNAN(base) || S21_isNAN(exp)) res = S21_NAN;
+  if (base < 0 && s21_fabs(s21_fmod(exp, 1.0)) > S21_EPS) res = -S21_NAN;
   return res;
 }
 
