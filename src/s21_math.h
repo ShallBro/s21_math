@@ -14,11 +14,10 @@
 
 #define S21_EXP 2.7182818284590452353602874713526624  // число Эйлера
 #define S21_EPS 1e-9
-#define S21_PI 3.1415926535897932384
+#define S21_PI 3.14159265358979323846264338327950288
 
 int s21_abs(int x);
-long double s21_fact(int x);
-long double s21_fmax(double a, double b);  // для вычисления квадрата
+long double s21_fmax(double a, double b);  // для вычисления корня
 long double s21_sqrt(double x);
 long double s21_fmod(double x, double y);
 long double s21_fabs(double x);

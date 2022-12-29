@@ -1,17 +1,9 @@
 #include "s21_math.h"
 
+// вычисляет абсолютное значение целочисленного значения
 int s21_abs(int x) { return x > 0 ? x : -x; }
 
-long double s21_fact(int N) {
-  if (N < 0) {
-    return 0;
-  } else if (N == 0) {
-    return 1;
-  } else {
-    return N * s21_fact(N - 1);
-  }
-}
-
+// функция для вычисления корня, макс точка интервала
 long double s21_fmax(double a, double b) {
   long double res = 1;
   if (a >= b) {
@@ -22,6 +14,7 @@ long double s21_fmax(double a, double b) {
   return res;
 }
 
+// вычисляет квадратный корень
 long double s21_sqrt(double x) {
   if (S21_isNAN(x)) {
     return S21_NAN;
@@ -46,6 +39,7 @@ long double s21_sqrt(double x) {
   return mid;
 }
 
+// остаток от операции деления с плавающей запятой
 long double s21_fmod(double x, double y) {
   if (!S21_isFIN(x) || S21_isNAN(y)) {
     return S21_NAN;
@@ -68,6 +62,7 @@ long double s21_fmod(double x, double y) {
   return res;
 }
 
+// вычисляет абсолютное значение значения с плавающей запятой
 long double s21_fabs(double x) {
   if (S21_isNAN(x)) {
     return S21_NAN;
@@ -81,41 +76,43 @@ long double s21_fabs(double x) {
   return x < 0 ? -x : x;
 }
 
+// возвращает e, возведенное в заданную степень
 long double s21_exp(double x) {
+  long double sum = 1;
   long double res = 1;
-  long double temp = 1;
   long double i = 1;
-  int flag = 0;
+  int count = 0;
   if (x < 0) {
     x *= -1;
-    flag = 1;
+    count = 1;
   }
-  while (s21_fabs(res) > S21_EPS) {
-    res *= x / i;
+  while (s21_fabs(sum) > S21_EPS) {
+    sum *= x / i;
     i += 1;
-    temp += res;
-    if (temp > DBL_MAX) {
-      temp = S21_INF;
+    res += sum;
+    if (res > DBL_MAX) {
+      res = S21_INF;
       break;
     }
   }
-  if (flag == 1) {
-    if (temp > DBL_MAX) {
-      temp = 0;
+  if (count == 1) {
+    if (res > DBL_MAX) {
+      res = 0;
     } else {
-      temp = 1. / temp;
+      res = 1. / res;
     }
   }
-  if (temp > DBL_MAX) {
-    return S21_INF;
+  if (res > DBL_MAX) {
+    res = S21_INF;
   }
-  return temp;
+  return res;
 }
 
+// вычисляет натуральный логарифм
 long double s21_log(double x) {
-  int ex_pow = 0;
+  int count = 0;
   double res = 0;
-  double compare = 0;
+  double cmp = 0;
   if (x == S21_INF) {
     res = S21_INF;
   } else if (x == 0) {
@@ -125,51 +122,54 @@ long double s21_log(double x) {
   } else if (x == 1) {
     res = 0;
   } else {
-    for (; x >= S21_EXP; x /= S21_EXP, ex_pow++) continue;
+    for (; x >= S21_EXP; x /= S21_EXP, count++) continue;
     int i;
     for (i = 0; i < 100; i++) {
-      compare = res;
-      res = compare + 2 * (x - s21_exp(compare)) / (x + s21_exp(compare));
+      cmp = res;
+      res = cmp + 2 * (x - s21_exp(cmp)) / (x + s21_exp(cmp));
     }
   }
-  return (res + ex_pow);
+  return (res + count);
 }
 
+// возвращает ближайшее целое число, округление в большую сторону
 long double s21_ceil(double x) {
   if (!S21_isFIN(x)) {
     return x;
   }
-  long double ceil_x = (long long int)x;
-  if (s21_fabs(x) > 0. && x != ceil_x) {
+  long double res = (long long int)x;
+  if (s21_fabs(x) > 0. && x != res) {
     if (x != DBL_MAX) {
       if (x > 0.) {
-        ceil_x += 1;
+        res += 1;
       }
     } else {
       return DBL_MAX;
     }
   }
-  return ceil_x;
+  return res;
 }
 
+// возвращает ближайшее целое число, округление в меньшую сторону
 long double s21_floor(double x) {
   if (!S21_isFIN(x)) {
     return x;
   }
-  long double floor_x = (long long int)x;
-  if (s21_fabs(x - floor_x) > 0. && s21_fabs(x) > 0.) {
+  long double res = (long long int)x;
+  if (s21_fabs(x - res) > 0. && s21_fabs(x) > 0.) {
     if (x < 0.) {
-      floor_x -= 1;
+      res -= 1;
     }
   }
-  return floor_x;
+  return res;
 }
 
+// возводит число в заданную степень
 long double s21_pow(double base, double exp) {
   long double res = 1;
   long double copy = base;
   long double expo = exp;
-
+  int flag = 0;
   if (copy < 0) {
     copy = -copy;
     res = s21_exp(exp * s21_log(copy));
@@ -191,51 +191,63 @@ long double s21_pow(double base, double exp) {
   }
   if ((base == S21_INF && exp == 1) || (S21_isNAN(base) && exp == 0) ||
       (base == 0 && exp == 0) || (base == -1 && S21_isINF(exp)) ||
-      (s21_fabs(base) == 1 && (exp == -S21_INF || S21_isNAN(exp))))
+      (s21_fabs(base) == 1 && (exp == -S21_INF || S21_isNAN(exp))) ||
+      (base == S21_NAN && exp == 0) || (base == -S21_NAN && exp == 0) ||
+      (base == S21_INF && exp == 0) || (base == -S21_INF && exp == 0) ||
+      (base == 1 && S21_isINF(exp)) || (base == 1 && S21_isINF(-exp))) {
     res = 1;
+    flag = 1;
+  }
 
   if (base == -S21_INF && -exp) res = 0;
-  if ((s21_fabs(base) - 1 < S21_EPS && S21_isINF(exp) && exp < 0) ||
-      (s21_fabs(base) - 1 > S21_EPS && S21_isINF(exp) && exp > 0) ||
-      (s21_fabs(base) <= S21_EPS && base >= 0 && exp < 0))
+  if ((s21_fabs(base) - 1 < S21_EPS && S21_isINF(exp) && exp < 0 &&
+       flag == 0) ||
+      (s21_fabs(base) - 1 > S21_EPS && S21_isINF(exp) && exp > 0 &&
+       flag == 0) ||
+      (s21_fabs(base) <= S21_EPS && base >= 0 && exp < 0 && flag == 0))
     res = S21_INF;
   if (S21_isINF(base) && base < 0 && exp > 0) res = S21_INF;
-  if (S21_isNAN(base) || S21_isNAN(exp)) res = S21_NAN;
+  if ((S21_isNAN(base) && S21_isNAN(exp)) ||
+      (S21_isINF(base) && base < 0 && S21_isNAN(exp)) ||
+      (S21_isINF(base) && base < 0 && S21_isNAN(exp) && exp < 0))
+    res = S21_NAN;
   if (base < 0 && s21_fabs(s21_fmod(exp, 1.0)) > S21_EPS) res = -S21_NAN;
   return res;
 }
 
+// вычисляет арктангенс
 long double s21_atan(double x) {
-  long double sum_atan = 0;
-  const long double s21_atan_1 = 0.7853981633974480L;
+  long double res = 0;
+  const long double atan = 0.7853981633974480L;
   if (S21_isNAN(x)) {
     return S21_NAN;
   }
   if (x == 1) {
-    sum_atan = s21_atan_1;
+    res = atan;
   } else if (x == -1) {
-    sum_atan = -s21_atan_1;
+    res = -atan;
   } else if (x == S21_PI / 2) {
-    sum_atan = 1.003884821853887214L;
+    res = 1.003884821853887214L;
   } else if (x == -S21_PI / 2) {
-    sum_atan = -1.003884821853887214L;
+    res = -1.003884821853887214L;
   } else if (x == S21_INF || x == -S21_INF) {
-    sum_atan = x < 0 ? -S21_PI / 2 : S21_PI / 2;
+    res = x < 0 ? -S21_PI / 2 : S21_PI / 2;
   } else if (-1. < x && x < 1.) {
     for (register int i = 0; i < 5000; i++) {
-      sum_atan += s21_pow(-1, i) * s21_pow(x, 1 + (2 * i)) / (1 + (2 * i));
+      res += s21_pow(-1, i) * s21_pow(x, 1 + (2 * i)) / (1 + (2 * i));
     }
   } else {
     for (register int i = 0; i < 7000; i++) {
-      sum_atan += s21_pow(-1, i) * s21_pow(x, -1 - (2 * i)) / (1 + (2 * i));
+      res += s21_pow(-1, i) * s21_pow(x, -1 - (2 * i)) / (1 + (2 * i));
     }
-    sum_atan = S21_PI * s21_sqrt(x * x) / (2 * x) - sum_atan;
+    res = S21_PI * s21_sqrt(x * x) / (2 * x) - res;
   }
-  return sum_atan;
+  return res;
 }
 
+// вычисляет арксинус
 long double s21_asin(double x) {
-  long double asin = 0.;
+  long double res = 0.;
   if (x == 1.) {
     return S21_PI / 2;
   } else if (x == -1.) {
@@ -251,15 +263,16 @@ long double s21_asin(double x) {
     return -S21_PI / 4;
   }
   if (-1. < x && x < 1.) {
-    asin = s21_atan(x / s21_sqrt(1 - x * x));
+    res = s21_atan(x / s21_sqrt(1 - x * x));
   } else {
     return S21_NAN;
   }
-  return asin;
+  return res;
 }
 
+// вычисляет арккосинус
 long double s21_acos(double x) {
-  long double acos = 0.;
+  long double res = 0.;
   if (x == 1.) {
     return 0;
   } else if (x == -1.) {
@@ -274,15 +287,16 @@ long double s21_acos(double x) {
     return 3 * S21_PI / 4;
   }
   if (0. < x && x < 1.) {
-    acos = s21_atan(s21_sqrt(1 - x * x) / x);
+    res = s21_atan(s21_sqrt(1 - x * x) / x);
   } else if (-1. < x && x < 0.) {
-    acos = S21_PI + s21_atan(s21_sqrt(1 - x * x) / x);
+    res = S21_PI + s21_atan(s21_sqrt(1 - x * x) / x);
   } else {
     return S21_NAN;
   }
-  return acos;
+  return res;
 }
 
+// вычисляет синус
 long double s21_sin(double x) {
   int count = -1;
   if (x > 0) count = 1;
@@ -291,19 +305,26 @@ long double s21_sin(double x) {
     x -= 2 * S21_PI * s21_floor(x / (2 * S21_PI));
   }
   long double temp = x;
-  long double sum_sin = x;
+  long double res = x;
   unsigned int fact = 1;
   while (s21_fabs(temp) > S21_EPS * S21_EPS) {
     temp /= (fact + 1) * (fact + 2);
     fact += 2;
     temp *= -x * x;
-    sum_sin += temp;
+    res += temp;
   }
-  return sum_sin * count;
+  return res * count;
 }
 
-long double s21_cos(double x) { return s21_sin(S21_PI / 2 - x); }
+// вычисляет косинус
+long double s21_cos(double x) {
+  if (x > 2 * S21_PI || x < -2 * S21_PI) {
+    x += x > 2 * S21_PI ? -2 * S21_PI : 2 * S21_PI;
+  }
+  return s21_sin((S21_PI / 2.0) - x);
+}
 
+// вычисляет тангенс
 long double s21_tan(double x) {
   if (x == S21_PI / 2) {
     return 16331239353195370L;
