@@ -16,12 +16,13 @@ long double s21_fmax(double a, double b) {
 
 // вычисляет квадратный корень
 long double s21_sqrt(double x) {
+  long double mid;
   if (S21_isNAN(x)) {
-    return S21_NAN;
+    mid = S21_NAN;
   }
   long double left = 0;
   long double right = s21_fmax(1, x);
-  long double mid;
+
   mid = (left + right) / 2;
   if (x < 0) {
     mid = S21_NAN;
@@ -41,39 +42,40 @@ long double s21_sqrt(double x) {
 
 // остаток от операции деления с плавающей запятой
 long double s21_fmod(double x, double y) {
-  if (!S21_isFIN(x) || S21_isNAN(y)) {
-    return S21_NAN;
+  long double res;
+  if (!S21_isFIN(x) || S21_isNAN(y) || (S21_isINF(x) && S21_isINF(y)) ||
+      (s21_fabs(y) < 1e-7)) {
+    res = S21_NAN;
+  } else {
+    if (S21_isINF(y)) {
+      res = x;
+    } else {
+      if (s21_fabs(x) < 1e-7) {
+        res = 0;
+      } else {
+        long long int mod = 0;
+        mod = x / y;
+        res = (long double)x - mod * (long double)y;
+      }
+    }
   }
-  if (S21_isINF(x) && S21_isINF(y)) {
-    return S21_NAN;
-  }
-  if (S21_isINF(y)) {
-    return x;
-  }
-  if (s21_fabs(y) < 1e-7) {
-    return S21_NAN;
-  }
-  if (s21_fabs(x) < 1e-7) {
-    return 0;
-  }
-  long long int mod = 0;
-  mod = x / y;
-  long double res = (long double)x - mod * (long double)y;
   return res;
 }
 
 // вычисляет абсолютное значение значения с плавающей запятой
 long double s21_fabs(double x) {
+  long double res;
   if (S21_isNAN(x)) {
-    return S21_NAN;
+    res = S21_NAN;
   }
   if (!S21_isFIN(x)) {
     if (x < 0) {
-      return -x;
+      res = -x;
     }
-    return x;
+    res = x;
   }
-  return x < 0 ? -x : x;
+  res = x < 0 ? -x : x;
+  return res;
 }
 
 // возвращает e, возведенное в заданную степень
@@ -86,13 +88,12 @@ long double s21_exp(double x) {
     x *= -1;
     count = 1;
   }
-  while (s21_fabs(sum) > S21_EPS) {
+  while (s21_fabs(sum) > S21_EPS && res != S21_INF) {
     sum *= x / i;
     i += 1;
     res += sum;
     if (res > DBL_MAX) {
       res = S21_INF;
-      break;
     }
   }
   if (count == 1) {
@@ -134,17 +135,17 @@ long double s21_log(double x) {
 
 // возвращает ближайшее целое число, округление в большую сторону
 long double s21_ceil(double x) {
-  if (!S21_isFIN(x)) {
-    return x;
-  }
   long double res = (long long int)x;
+  if (!S21_isFIN(x)) {
+    res = x;
+  }
   if (s21_fabs(x) > 0. && x != res) {
     if (x != DBL_MAX) {
       if (x > 0.) {
         res += 1;
       }
     } else {
-      return DBL_MAX;
+      res = DBL_MAX;
     }
   }
   return res;
@@ -152,10 +153,10 @@ long double s21_ceil(double x) {
 
 // возвращает ближайшее целое число, округление в меньшую сторону
 long double s21_floor(double x) {
-  if (!S21_isFIN(x)) {
-    return x;
-  }
   long double res = (long long int)x;
+  if (!S21_isFIN(x)) {
+    res = x;
+  }
   if (s21_fabs(x - res) > 0. && s21_fabs(x) > 0.) {
     if (x < 0.) {
       res -= 1;
@@ -198,7 +199,6 @@ long double s21_pow(double base, double exp) {
     res = 1;
     flag = 1;
   }
-
   if (base == -S21_INF && -exp) res = 0;
   if ((s21_fabs(base) - 1 < S21_EPS && S21_isINF(exp) && exp < 0 &&
        flag == 0) ||
@@ -220,7 +220,7 @@ long double s21_atan(double x) {
   long double res = 0;
   const long double atan = 0.7853981633974480L;
   if (S21_isNAN(x)) {
-    return S21_NAN;
+    res = S21_NAN;
   }
   if (x == 1) {
     res = atan;
@@ -249,23 +249,24 @@ long double s21_atan(double x) {
 long double s21_asin(double x) {
   long double res = 0.;
   if (x == 1.) {
-    return S21_PI / 2;
+    res = S21_PI / 2;
   } else if (x == -1.) {
-    return -S21_PI / 2;
-  }
-  if (s21_fabs(x) < 1e-9) {
-    return 0;
-  }
-  if (x == 0.7071067811865475244) {
-    return S21_PI / 4;
-  }
-  if (x == -0.7071067811865475244) {
-    return -S21_PI / 4;
-  }
-  if (-1. < x && x < 1.) {
-    res = s21_atan(x / s21_sqrt(1 - x * x));
+    res = -S21_PI / 2;
   } else {
-    return S21_NAN;
+    if (s21_fabs(x) < 1e-9) {
+      res = 0;
+    }
+    if (x == 0.7071067811865475244) {
+      res = S21_PI / 4;
+    }
+    if (x == -0.7071067811865475244) {
+      res = -S21_PI / 4;
+    }
+    if (-1. < x && x < 1.) {
+      res = s21_atan(x / s21_sqrt(1 - x * x));
+    } else {
+      res = S21_NAN;
+    }
   }
   return res;
 }
@@ -274,24 +275,25 @@ long double s21_asin(double x) {
 long double s21_acos(double x) {
   long double res = 0.;
   if (x == 1.) {
-    return 0;
+    res = 0;
   } else if (x == -1.) {
-    return S21_PI;
+    res = S21_PI;
   } else if (x == 0) {
-    return S21_PI / 2;
-  }
-  if (x == 0.7071067811865475244) {
-    return S21_PI / 4;
-  }
-  if (x == -0.7071067811865475244) {
-    return 3 * S21_PI / 4;
-  }
-  if (0. < x && x < 1.) {
-    res = s21_atan(s21_sqrt(1 - x * x) / x);
-  } else if (-1. < x && x < 0.) {
-    res = S21_PI + s21_atan(s21_sqrt(1 - x * x) / x);
+    res = S21_PI / 2;
   } else {
-    return S21_NAN;
+    if (x == 0.7071067811865475244) {
+      res = S21_PI / 4;
+    }
+    if (x == -0.7071067811865475244) {
+      res = 3 * S21_PI / 4;
+    }
+    if (0. < x && x < 1.) {
+      res = s21_atan(s21_sqrt(1 - x * x) / x);
+    } else if (-1. < x && x < 0.) {
+      res = S21_PI + s21_atan(s21_sqrt(1 - x * x) / x);
+    } else {
+      res = S21_NAN;
+    }
   }
   return res;
 }
@@ -326,13 +328,15 @@ long double s21_cos(double x) {
 
 // вычисляет тангенс
 long double s21_tan(double x) {
+  long double res;
   if (x == S21_PI / 2) {
-    return 16331239353195370L;
+    res = 16331239353195370L;
   } else if (x == -S21_PI / 2) {
-    return -16331239353195370L;
+    res = -16331239353195370L;
   }
   if (x == 0) {
-    return 0;
+    res = 0;
   }
-  return s21_sin(x) / s21_cos(x);
+  res = s21_sin(x) / s21_cos(x);
+  return res;
 }
