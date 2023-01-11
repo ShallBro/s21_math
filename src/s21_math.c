@@ -233,11 +233,11 @@ long double s21_atan(double x) {
   } else if (x == S21_INF || x == -S21_INF) {
     res = x < 0 ? -S21_PI / 2 : S21_PI / 2;
   } else if (-1. < x && x < 1.) {
-    for (register int i = 0; i < 5000; i++) {
+    for (register int i = 0; i < 100; i++) {
       res += s21_pow(-1, i) * s21_pow(x, 1 + (2 * i)) / (1 + (2 * i));
     }
   } else {
-    for (register int i = 0; i < 7000; i++) {
+    for (register int i = 0; i < 100; i++) {
       res += s21_pow(-1, i) * s21_pow(x, -1 - (2 * i)) / (1 + (2 * i));
     }
     res = S21_PI * s21_sqrt(x * x) / (2 * x) - res;
