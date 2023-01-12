@@ -1,4 +1,4 @@
-CFILES = $(wildcard *.c)
+CFILES = $(wildcard s21*.c)
 OBJ = $(patsubst %.c, %.o, $(CFILES))
 TARGET = s21_math
 CHECK:=$(shell pkg-config --cflags --libs check)
@@ -8,8 +8,11 @@ CFLAGS=-Wall -Werror -Wextra -std=c11
 S21_MATH=-L. s21_math.a
 DEBUG =-g
 CTESTFLAGS=-lcheck -lm -lpthread 
-TEST = s21_tests_math.c
+TEST = tests_math.c
 LIBRARY = s21_math.a
+
+
+all: clean $(LIBRARY) test gcov_report
 
 $(TARGET): s21_math.o
 	$(CC) s21_math.o -o $(TARGET)
@@ -23,7 +26,6 @@ $(LIBRARY): s21_math.h $(CFILES)
 	ranlib $(LIBRARY)
 	rm -f $(OBJ)
 
-
 clean:
 	rm -rf *.o *.a test *.gcda *.gcno *.info coverage
 
@@ -32,6 +34,7 @@ style:
 	clang-format -style=google -i *.h
 	clang-format -style=google -n *.c
 	clang-format -style=google -n *.h
+
 checkstyle:
 	clang-format -style=google -n *.c
 	clang-format -style=google -n *.h
@@ -39,7 +42,7 @@ checkstyle:
 de: $(TARGET)
 		
 gcov_report: $(LIBRARY)
-	$(CC) $(FLAG_COV) $(CFLAGS) $(CTESTFLAGS) s21_tests_math.c -o test $(CHECK) $(S21_MATH)
+	$(CC) $(FLAG_COV) $(CFLAGS) $(CTESTFLAGS) $(TEST) -o test $(CHECK) $(S21_MATH)
 	./test
 	lcov -t "test" -o test.info -c -d .
 	genhtml -o coverage test.info
@@ -48,6 +51,7 @@ gcov_report: $(LIBRARY)
 test: $(LIBRARY)
 	$(CC) $(CTESTFLAGS) $(TEST) $(LIBRARY) -o test
 	./test
+
 rebuild:
 	make clean
 	make
