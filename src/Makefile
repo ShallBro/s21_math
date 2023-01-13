@@ -49,6 +49,8 @@ gcov_report: $(LIBRARY)
 	open coverage/index.html 
 
 test: $(LIBRARY)
+#	checkmk s21_math.check > tests_math.c
+#	checkmk clean_mode=1 s21_math.check > tests_math.c
 	$(CC) $(CTESTFLAGS) $(TEST) $(LIBRARY) -o test
 	./test
 
