@@ -14,7 +14,7 @@ long double s21_fmax(double a, double b) {
   return res;
 }
 
-// вычисляет квадратный корень
+// вычисляет квадратный корень //
 long double s21_sqrt(double x) {
   long double mid;
   if (S21_isNAN(x)) {

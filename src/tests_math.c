@@ -13,7 +13,7 @@
 #include "s21_math.h"
 
 START_TEST(s21_abs_test) {
-  // READY
+  // READY /
   ck_assert_int_eq(abs(-1), s21_abs(-1));
   ck_assert_int_eq(abs(0), s21_abs(0));
   ck_assert_int_eq(abs(12), s21_abs(12));

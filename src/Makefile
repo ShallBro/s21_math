@@ -54,6 +54,8 @@ test: $(LIBRARY)
 	$(CC) $(CTESTFLAGS) $(TEST) $(LIBRARY) -o test
 	./test
 
+
+
 rebuild:
 	make clean
 	make
