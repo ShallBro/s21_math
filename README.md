@@ -1,8 +1,8 @@
 # s21_math
 Implementation of our own version of the math.h library.
-# Information
+## Information
 C mathematical operations are a group of functions in the standard library of the C programming language implementing basic mathematical functions. All functions use floating-point numbers in one manner or another. Different C standards provide different, albeit backwards-compatible, sets of functions. Any functions that operate on angles use radians as the unit of angle.
-# Overview of "s21_math.h" functions
+## Overview of "s21_math.h" functions
 | No. | Function | Description |
 | --- | -------- | ----------- |
 | 1 | int abs(int x) | computes absolute value of an integer value |
